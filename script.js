@@ -61,6 +61,7 @@ $(function () {
 		}
 
 		$('#coil-turns').text(coilTurns.toFixed(1));
+		$('#coil-line-length').text( (Math.PI * coilRadius * coilTurns).toFixed(1) );
 
 		var radialLength = 58 / frequency;
 		$('#radial-length').text(radialLength.toFixed(1));
@@ -80,11 +81,13 @@ $(function () {
 		canvas.width  = $('.container').innerWidth();
 		canvas.height = 500;
 		var ctx = canvas.getContext('2d');
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = '#000000';
 
 		var scale =  canvas.width / (totalLength * 1000 + 100);
 
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.translate(10, 150);
+		ctx.translate(30, 150);
 		ctx.scale(scale, scale);
 
 		var pathPipe =  function (x, radius, length) {
@@ -98,6 +101,7 @@ $(function () {
 
 		var offset = 50;
 		var drawSize = function (x, length, barSize, direction) {
+			ctx.save();
 			ctx.beginPath();
 			ctx.moveTo(x, offset * direction);
 			ctx.lineTo(x, (offset + barSize) * direction);
@@ -105,10 +109,13 @@ $(function () {
 			ctx.lineTo(x + length, (offset + barSize) * direction);
 			ctx.moveTo(x, (offset + barSize * 0.8) * direction);
 			ctx.lineTo(x + length, (offset + barSize * 0.8) * direction);
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = '#333333';
 			ctx.stroke();
 			ctx.font = (1 / scale * 10) + "px Arial";
 			ctx.textAlign = "center";
 			ctx.fillText(length + "mm", x + length / 2, (offset + barSize * 0.8) * direction);
+			ctx.restore();
 		};
 
 		var x = 0;
@@ -143,6 +150,34 @@ $(function () {
 			d *= -1;
 			x += l * 1000;
 		}
+
+		ctx.beginPath();
+		ctx.moveTo(0, 0);
+		ctx.bezierCurveTo(
+			-50, 30,
+			-30, 150,
+			20, 200
+		);
+		ctx.bezierCurveTo(
+			50, 230,
+			50, 220,
+			500, 220
+		);
+		ctx.moveTo(500 + 40, 220);
+		ctx.lineTo(700, 220);
+		ctx.lineWidth = 5;
+		ctx.strokeStyle = '#666666';
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(500, 220);
+		ctx.arc(500 + 20, 220, 20, Math.PI, Math.PI * 3, false);
+		ctx.lineWidth = 15;
+		ctx.stroke();
+
+		ctx.textAlign = 'left';
+		ctx.font = (1 / scale * 10) + "px Arial";
+		ctx.fillText(radialLength.toFixed(2) + "m", 80, 250);
 	}
 
 	function calcCoilTurns (inductance, coilRadius, coilLength) {
