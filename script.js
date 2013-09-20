@@ -24,11 +24,11 @@ $(function () {
 
 
 		var elementLength = $('[name=element-length]');
-		var elementsRadius = $('[name=element-radius]');
+		var elementsDiameter = $('[name=element-diameter]');
 
 		var capacitance = 0;
 		var radiatorLength = 0;
-		for (var i = 0, l; (l = elementLength[i]) && (r = elementsRadius[i]); i++) {
+		for (var i = 0, l; (l = elementLength[i]) && (r = elementsDiameter[i]); i++) {
 			l = +l.value;
 			if (!l) continue;
 			r = +r.value / 1000; // mm -> m
@@ -42,14 +42,14 @@ $(function () {
 		$('#inductance').text(inductance.toFixed(2));
 
 
-		var coilRadius = +$('[name=coil-radius]').val();
+		var coilDiameter = +$('[name=coil-diameter]').val();
 		var coilLength = +$('[name=coil-length]').val();
 		var closeCoiling = $('[name=close-coiling]').prop('checked');
 
 		var coilTurns = NaN;
 		if (closeCoiling) {
 			for (var i = 1; i < 10000; i++) {
-				coilTurns = calcCoilTurns(inductance, coilRadius, i);
+				coilTurns = calcCoilTurns(inductance, coilDiameter, i);
 				if (coilTurns < i) {
 					break;
 				}
@@ -57,11 +57,11 @@ $(function () {
 			coilLength = i;
 			$('[name=coil-length]').val(i);
 		} else {
-			coilTurns = calcCoilTurns(inductance, coilRadius, coilLength);
+			coilTurns = calcCoilTurns(inductance, coilDiameter, coilLength);
 		}
 
 		$('#coil-turns').text(coilTurns.toFixed(1));
-		$('#coil-line-length').text( (Math.PI * coilRadius * coilTurns).toFixed(1) );
+		$('#coil-line-length').text( (Math.PI * coilDiameter * coilTurns).toFixed(1) );
 
 		var radialLength = 58 / frequency;
 		$('#radial-length').text(radialLength.toFixed(1));
@@ -90,13 +90,13 @@ $(function () {
 		ctx.translate(30, 150);
 		ctx.scale(scale, scale);
 
-		var pathPipe =  function (x, radius, length) {
+		var pathPipe =  function (x, diameter, length) {
 			ctx.beginPath();
-			ctx.moveTo(x, -radius / 2);
-			ctx.lineTo(x, +radius / 2);
-			ctx.lineTo(x + length, +radius / 2);
-			ctx.lineTo(x + length, -radius / 2);
-			ctx.lineTo(x, -radius / 2);
+			ctx.moveTo(x, -diameter / 2);
+			ctx.lineTo(x, +diameter / 2);
+			ctx.lineTo(x + length, +diameter / 2);
+			ctx.lineTo(x + length, -diameter / 2);
+			ctx.lineTo(x, -diameter / 2);
 		};
 
 		var offset = 50;
@@ -124,17 +124,17 @@ $(function () {
 
 		drawSize(x, Math.floor(totalLength * 1000), 200, -1);
 
-		pathPipe(x, coilRadius, coilLength + 300);
+		pathPipe(x, coilDiameter, coilLength + 300);
 		ctx.stroke();
 		drawSize(x, coilLength + 300, 100, 1);
 
 		x += 150;
-		pathPipe(x, coilRadius + 2, coilLength);
+		pathPipe(x, coilDiameter + 2, coilLength);
 		ctx.fill();
 		drawSize(x, coilLength, 50, 1);
 
 		x += coilLength + 30;
-		for (var i = 0, d = -1, l; (l = elementLength[i]) && (r = elementsRadius[i]); i++) { // no warnings
+		for (var i = 0, d = -1, l; (l = elementLength[i]) && (r = elementsDiameter[i]); i++) { // no warnings
 			l = +l.value;
 			if (!l) continue;
 			r = +r.value;
@@ -180,9 +180,9 @@ $(function () {
 		ctx.fillText(radialLength.toFixed(2) + "m", 80, 250);
 	}
 
-	function calcCoilTurns (inductance, coilRadius, coilLength) {
-		var nagaokaFactor = 1 / (1 + 0.9 *(coilRadius / 2) / coilLength - 0.02 * (coilRadius / 2) / (coilLength * coilLength));
-		var coilTurns = 2/(3.14*coilRadius)*Math.sqrt((inductance*coilLength)/(nagaokaFactor*0.4))*Math.sqrt(1000);
+	function calcCoilTurns (inductance, coilDiameter, coilLength) {
+		var nagaokaFactor = 1 / (1 + 0.9 *(coilDiameter / 2) / coilLength - 0.02 * (coilDiameter / 2) / (coilLength * coilLength));
+		var coilTurns = 2/(3.14*coilDiameter)*Math.sqrt((inductance*coilLength)/(nagaokaFactor*0.4))*Math.sqrt(1000);
 		return coilTurns;
 	}
 });
