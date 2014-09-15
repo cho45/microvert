@@ -181,8 +181,51 @@ $(function () {
 	}
 
 	function calcCoilTurns (inductance, coilDiameter, coilLength) {
-		var nagaokaFactor = 1 / (1 + 0.9 *(coilDiameter / 2) / coilLength - 0.02 * (coilDiameter / 2) / (coilLength * coilLength));
+		// var nagaokaFactor = 1 / (1 + 0.9 *(coilDiameter / 2) / coilLength - 0.02 * (coilDiameter / 2) / (coilLength * coilLength));
+		var nagaokaFactor = nagaokaCoefficient(coilDiameter, coilLength);
 		var coilTurns = 2/(3.14*coilDiameter)*Math.sqrt((inductance*coilLength)/(nagaokaFactor*0.4))*Math.sqrt(1000);
 		return coilTurns;
+	}
+
+	function nagaokaCoefficient (d, l) {
+		var k  = 1 / Math.sqrt(1 + ((l / d) * (l / d)));
+		var k_ = k * k;
+
+		var EI = completeEllipticIntegral(k);
+
+		return ( 4 / (3 * Math.PI * Math.sqrt(1 - k_)) ) * (
+			( (1 - k_) / k_ * EI.K ) -
+			( (1 - 2 * k_) / k_ * EI.E ) -
+			k
+		);
+
+		function completeEllipticIntegral (k) {
+			var a, b, a1, b1, amb, E, i, kk, IK, IE;
+
+			kk = k*k;
+			a = 1;
+			b = Math.sqrt(1-kk);
+			E = 1-kk/2;
+			i = 1;
+			do
+			{
+				a1 = (a+b)/2;
+				b1 = Math.sqrt(a*b);
+				amb = a-b;
+				E -= i*amb*amb/4;
+				i *= 2;
+				a = a1;
+				b = b1;
+			} while (Math.abs(a-b)>1e-15);
+
+			IK = Math.PI/(2*a);
+			IE = E*IK;
+
+			return {
+				K : IK,
+				E : IE
+			};
+		}
+
 	}
 });
